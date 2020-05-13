@@ -1,9 +1,30 @@
- <?php
- 
- $products = $producthunt_api->getFreshProducts();
- 
- ?>
+<?php
+    
+    $categorie = $producthunt_api->getCategories();
+    //echo $categorie[0]['name'];
 
+        if (isset($_POST['orderBy']) && $_POST['orderBy'] === 'catégorie'){ 
+        
+           
+            for ($i=0; $i < count($categorie) ; $i++) { 
+                echo $categorie[$i]['category_id'];
+
+                echo '<br>';
+                echo ($producthunt_api->getFreshProducts()[$i]['summary']);
+                echo '<br>';
+
+                if ($product['summary'] === ($producthunt_api->getFreshProducts($i)[$i]['summary'])){
+                    echo('<h3>'.$product['name'].'</h3>');
+                    $products = $producthunt_api->getFreshProducts($i);
+                }
+                //getProductCollection(catégory id)
+                
+            }
+            
+            
+            
+        } else {$products = $producthunt_api->getFreshProducts(10);
+?>
 
 
 <!--productModal-->
@@ -17,10 +38,9 @@
 
 <?php ###################################### Affiche La liste des produits ###########################################
 
-    $total_products = count($products);
  
-    for ($i=0; $i <$total_products ; $i++) { ?>
-        <hr>
+    for ($i=0; $i <count($products) ; $i++) { ?>
+
         <div data-product-id='<?= $products[$i]["id"] ?>' id="div-product" class="row  m-0">
             
             <div class="col-2 d-flex align-items-center justify-content-center product-img ">
@@ -61,7 +81,7 @@
             </div>
               
         </div>
-    
+    <hr>
         
     
-<?php } ?>
+<?php } } ?>
