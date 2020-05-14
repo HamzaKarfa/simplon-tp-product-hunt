@@ -23,43 +23,66 @@
             <div class="collapse navbar-collapse " id="navbarSupportedContent">
 			<?php if (isset($_COOKIE['user_name'])){?>
                     
-            	  	<div class="col-7 ml-5 pl-5 justify-content-center">
+            	  	<div class="col-5 d-flex justify-content-center p-0">
 						
 					 	 <form class="form-inline">
-            	          <input class="form-control form-control-sm mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            	          <input class="form-control form-control-sm " type="search" placeholder="Search" aria-label="Search">
             	          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
 						</form> 
 						
 					</div>
 
-					<div class="col-5 justify-content-center">
-						<form method="post" action="index.php">
-            	    	    <div class="form-group ">
-            	    	        <select class="form-control form-control-sm " name="orderBy">
-								  <option value="default">Trié par</option>
-								  <option value="catégorie">Catégorie</option>
-								  <option value="created_at">Date</option>
-								  <option value="up_vote">Les mieux votés</option>
-								</select>
-								<button type="submit">Trier</button>
+					<div class="col-4 d-flex justify-content-center  p-0 mr-4">
+						<?php if (isset($_COOKIE['user_name'])){?>
+							<h6>Trier par : </h6>
+							<div class="pl-3 ">
+								
+								<div class="row">
+									<form  method="post" id="catégorie" action="index.php"> 
+										<input type="hidden" name="orderBy" value="catégorie"/> 
+									</form> 
+									<a href='#' onclick='document.getElementById("catégorie").submit()'>Catégorie </a>
+									<p> / </p>					
+									<form  method="post" id="created_at" action="index.php"> 
+										<input type="hidden" name="orderBy" value="created_at"/> 
+									</form> 
+									<a href='#' onclick='document.getElementById("created_at").submit()'> Date </a>
+									<p> / </p>						
+									<form  method="post" id="up_vote" action="index.php"> 
+										<input type="hidden" name="orderBy" value="up_vote"/> 
+									</form> 
+									<a href='#' onclick='document.getElementById("up_vote").submit()'> Populaire</a>
+								</div>
 							</div>
+						<?php } ?>
+					</div>
+					<div class="col-3 d-flex justify-content-center  p-0">
+						<form  method="post" id="catégorie_list" action="index.php"> 
+
+							<select name="catégorie_list" id="catégorie_list">
+								<?php 
+								$categorie = $producthunt_api->getCategories();
+								for ($i=0; $i <count($categorie) ; $i++) { 
+									echo ("<option value=".$categorie[$i]['category_id'].">".$categorie[$i]['name']."</option>");
+								}?>
+	
+							</select>
+							<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Choisir</button>
 						</form>
-            	    </div>
-				 
+					</div>
 
 			<?php }?>
             </div>
 		
-		
-
             <div class="collapse navbar-collapse m-0 justify-content-end " id="navbarSupportedContent">
               	<div class="align-items-end flex-column">
 				  <?php if (isset($_COOKIE['user_name'])){?>
-                      <a class="nav-link" href="../src/Partials/index_logout.php" ><h4>Deconnexion</h4></a>
+                      <a class="nav-link" href="./src/Pages/logout.php" ><h4>Deconnexion</h4></a>
                     <?php } ?>
             	</div>  
 			</div>            
-		 
         
         </nav>    
-    </header>
+	</header>
+	
+	

@@ -24,6 +24,11 @@ html {
 .website img , .comment img, .up img{
   width: 50px;
 }
+.div-product:hover{
+  background-color: lightgrey;
+  box-shadow:2px 2px 15px gray;
+
+}
 
 /*### Modal Product ###*/
 .createdDiv{

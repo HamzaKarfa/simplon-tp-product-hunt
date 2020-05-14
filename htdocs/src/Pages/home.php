@@ -2,7 +2,9 @@
 
 if (isset($_POST['user_name'])) {
     setcookie('user_name', $_POST['user_name'], time() + 3600); //Cookie 1h
-
+    $url = "index.php";
+    $delay = 1;
+    header("Refresh: $delay;url=$url");
 }
 
 include ROOT . 'src/Partials/header.php' 
@@ -16,7 +18,7 @@ include ROOT . 'src/Partials/header.php'
 
         <div class=" col-xl-3 col-lg-1 ">
         </div>
-        <div class="col-xl-6 col-lg-10  border text-center m-0 ">
+        <div class="col-xl-6 col-lg-10 text-center m-0 p-0 ">
 
             <?php
             if (isset($_COOKIE['user_name'])) {
