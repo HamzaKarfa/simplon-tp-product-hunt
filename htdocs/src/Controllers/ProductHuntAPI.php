@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Controllers;
 
 use Exception;
+use PDOException;
 use Models\Model;
 
 /**
@@ -89,7 +90,7 @@ class ProductHuntAPI extends API
      * 
      * @api ProductHuntAPI
      * @endpoint Vote
-     *
+     * @mode POST 
      * 
      * @query ?controller=ProductHuntAPI&endpoint=Vote&user_id={id}&product_id={id}
      *
@@ -111,8 +112,10 @@ class ProductHuntAPI extends API
      * @Response STATUS 400 - application/json
      * Bad Request
      * <pre><code>
-     * ['ERROR : missing or invalid parameter product_id']
-     * ['ERROR : missing or invalid parameter user_id']
+     * ['ERROR : missing or invalid parameter product_id.']
+     * ['ERROR : missing or invalid parameter user_id.']
+     * ['ERROR : vote has already been cast for this used_id, product_id.']
+     * ['ERROR : user_id or product_id does NOT exist, cannot cast vote.']
      * </code></pre>
      * 
      * @Response STATUS 500 - application/json
@@ -132,13 +135,13 @@ class ProductHuntAPI extends API
         if (!isset($this->args['user_id']) || !is_numeric($this->args['user_id'])) {
             /* Bad Request */
             $this->args['status_code'] = 400;
-            return ['ERROR : missing or invalid parameter user_id'];
+            return ['ERROR : missing or invalid parameter user_id.'];
         }
 
         if (!isset($this->args['product_id']) || !is_numeric($this->args['product_id'])) {
             /* Bad Request */
             $this->args['status_code'] = 400;
-            return ['ERROR : missing or invalid parameter product_id'];
+            return ['ERROR : missing or invalid parameter product_id.'];
         }
 
         $user_id = intval($this->args['user_id'] ?? 0);
@@ -159,10 +162,26 @@ class ProductHuntAPI extends API
             // $this->args['data'] = $results;
 
             return $results;
-        } catch (Exception $e) {
+        } catch (PDOException | Exception $e) {
+            $error_msg = $e->getMessage();
+
+            $duplicate_entry = 'Integrity constraint violation: 1062 Duplicate entry';
+            if (strpos($error_msg, $duplicate_entry) !== false) {
+                /* Bad Request */
+                $this->args['status_code'] = 400;
+                return ['ERROR : vote already been cast for this user_id, product_id.'];
+            }
+
+            $fk_constraint_fail = 'Integrity constraint violation: 1452';
+            if (strpos($error_msg, $fk_constraint_fail) !== false) {
+                /* Bad Request */
+                $this->args['status_code'] = 400;
+                return ['ERROR : user_id or product_id does NOT exist, cannot cast vote.'];
+            }
+
             /* Internal Server Error */
             $this->args['status_code'] = 500;
-            return [$e->getMessage()];
+            return [$error_msg];
         }
     }
 
@@ -171,8 +190,7 @@ class ProductHuntAPI extends API
      * 
      * @api ProductHuntAPI
      * @endpoint Product
-     *
-     * 
+     * @mode GET 
      * @query ?controller=ProductHuntAPI&endpoint=Product&product_id={id}
      *
      * @return array to be emitted as json by ProductHuntAPI controller
@@ -277,7 +295,8 @@ class ProductHuntAPI extends API
      * @api ProductHuntAPI
      * @endpoint Product
      * @sub-resource Fresh
-     *
+     * @mode GET
+     * 
      * Pagination option is available on this resource.
      * 
      * @query ?controller=ProductHuntAPI&endpoint=Product&sub=Fresh
@@ -373,6 +392,7 @@ class ProductHuntAPI extends API
      * @api ProductHuntAPI
      * @endpoint Product
      * @sub-resource Popular
+     * @mode GET
      *
      * Pagination option is available on this resource.
      * 

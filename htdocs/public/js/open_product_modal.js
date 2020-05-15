@@ -2,23 +2,65 @@
 
 const products_ids = document.querySelectorAll('#div-product') 
 const  modalContent = document.querySelector('.modal-content') 
-
-//Récupération des data attribute
-    const productName = product_id.getAttribute('data-product-name')
-    const productVoteCount = document.querySelector('.voteCount')
-    const productSummary = product_id.getAttribute('data-product-summary')
-    const productWebsite = product_id.getAttribute('data-product-website')
-    const productIcon = product_id.getAttribute('data-product-img')
-    const id = product_id.getAttribute('data-product-id')
-    const user_id = product_id.getAttribute('data-product-user_id')
+const  btn_upVotes = document.querySelectorAll('#btn_upVote') 
 
 
 //Lancement de la requete au produit sélectionné
-    products_ids.forEach(product_id => {
-        product_id.addEventListener('click', function (e) {
+    products_ids.forEach(product_id => { 
+
+        //Récupération des data attribute
+        const productName = product_id.getAttribute('data-product-name')   
+        const productVoteCount = document.querySelector('.voteCount')
+        const productSummary = product_id.getAttribute('data-product-summary')
+        const productWebsite = product_id.getAttribute('data-product-website')
+        const productIcon = product_id.getAttribute('data-product-img')
+        const id = product_id.getAttribute('data-product-id')
+
+
+        //Ecouteur d'évenement sur la div
+        product_id.addEventListener('click', function () {
+
             displayModalContent ('?controller=ProductHuntAPI&endpoint=Product&product_id='+id,productName,productVoteCount,productSummary,productWebsite,productIcon)
         })
     })
+    btn_upVotes.forEach(btn_upVote => { 
+
+
+        const userId = btn_upVote.getAttribute('data-user-id')
+        const id = btn_upVote.getAttribute('data-product-id')
+        const userVoted = btn_upVote.getAttribute('data-user-id-voted')
+
+        if (userVoted == true) {
+            
+            btn_upVote.classList.add('btn-info')
+            btn_upVote.classList.add('bg-info')
+            btn_upVote.classList.add('disabled')
+
+        }else{ 
+            
+        btn_upVote.addEventListener('click', function (event) {
+
+                    event.stopPropagation();
+            listVote('?controller=ProductHuntAPI&endpoint=Vote&user_id='+ userId +'&product_id='+id);
+            this.classList.add('disabled')
+        },true)  
+             
+        }
+
+    
+    })        
+
+        function listVote(url){
+            fetch(url,{method: "POST"})
+            .then(response => {
+                console.log(response)
+                return response;
+            })
+            .then(data =>{
+                console.log(data)
+            })
+        }
+
 //Requete ajax récupe les données et affiche le modal du produit avec l'id correspondant
 function displayModalContent (url,productName,productVoteCount,productSummary,productWebsite,productIcon){
    
@@ -28,7 +70,7 @@ function displayModalContent (url,productName,productVoteCount,productSummary,pr
             return response.json()
         })
         .then(datas =>{
-            
+            console.log(datas)
             if(document.querySelector('.modal-content div') !== null){
                 document.querySelector('.modal-content div').remove('div')
                 //console.log('deleted')          
@@ -72,6 +114,7 @@ function displayModalContent (url,productName,productVoteCount,productSummary,pr
                 
                             +'<div id="carouselExampleControls" class="carousel slide" data-ride="carousel">'
                             +'  <div class="carousel-inner">';
+                            
             for (let j = 0; j < datas.media.length; j++) {
                 if (j === 0){
                     active = 'active'
@@ -150,11 +193,5 @@ function displayModalContent (url,productName,productVoteCount,productSummary,pr
             }
         })
     };
-function upVote(){
-    const vote_products = document.querySelectorAll('#btn_upVote')
-        vote_products.forEach( vote_product => {
-            vote_product.addEventListener('click',function(){
-                this.restPOSTVote('?controller=ProductHuntAPI&endpoint=Vote&user_id='+user_id+'&product_id='+id)
-            })
-        })
-}
+
+

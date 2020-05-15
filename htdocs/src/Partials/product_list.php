@@ -1,14 +1,20 @@
-
+<div></div>
 <?php ###################################### Affiche La liste des produits ###########################################
 
-function productDisplay ($products){
+function productDisplay ($products,$userId,$votesList){
+    
          for ($i=0; $i < count($products) ; $i++) { 
 
+            if (in_array($products[$i]["product_id"], $votesList)) {
+                $voted = true;
+               }else{
+                $voted = false;
+                   
+               }
 ?>
 
         <div id="div-product" class=" div-product border row m-0 p-4 "  data-toggle="modal" data-target=".bd-example-modal-xl"
              data-product-id='<?= $products[$i]["product_id"] ?>'
-             data-product-user-id='<?= $products[$i]["user_id"] ?>'
              data-product-name='<?= $products[$i]["name"] ?>'
              data-product-summary='<?= $products[$i]["summary"] ?>' 
              data-product-website='<?= $products[$i]["website"] ?>'
@@ -43,7 +49,13 @@ function productDisplay ($products){
                 <div class="col-2 d-flex align-items-center justify-content-center">
 
                     <div class="up-vote border">
-                    <button type="button" class="btn btn-outline-light" id="btn_upVote">
+                    <button type="button" 
+                            class="btn btn-outline-light p-0 "
+                            data-user-id='<?= $userId ?>'
+                            data-user-id-voted='<?= $voted ?>'
+
+                            data-product-id='<?= $products[$i]["product_id"] ?>' 
+                            id="btn_upVote">
                         <img src="public/images/icons/upvote.png"></img>
                         <h4 class="voteCount text-dark"><?=$products[$i]['votes_count']?></h4>
                     </button>
@@ -60,15 +72,18 @@ function productDisplay ($products){
 
 
 <?php
+    $userId = $producthunt_api->getUserbyName($_COOKIE['user_name']);
+    $votesList = $producthunt_api->getUserVotes($userId['user_id']);
     
-    
+
     if ((isset($_POST['catégorie_list']) ) == null){
         //Affichage des produit par defaut
         if (isset($_POST['orderBy']) == null || $_POST['orderBy'] === 'default'){
  
-            
+        
             $products = $producthunt_api->getProductsCollection(10);
-            productDisplay ($products);
+
+            productDisplay ($products,$userId,$votesList);
         }
         //Affichage des produit par catégorie
         else if (isset($_POST['orderBy']) && $_POST['orderBy'] === 'catégorie'){ 
@@ -76,40 +91,38 @@ function productDisplay ($products){
             for ($i=0; $i < count($categorie) ; $i++) { 
                 echo '<h4>'."Catégorie : ".$categorie[$i]['name'].'</h4>';
                 echo '<br>';
-
+    
                 $products = $producthunt_api->getProductsCollection($categorie[$i]['category_id']);
 
-                    productDisplay ($products);
+                    productDisplay ($products,$userId,$votesList);
             }
         }
         //Affichage des produit par date de création
         else if (isset($_POST['orderBy']) && $_POST['orderBy'] === 'created_at'){ 
             $products = $producthunt_api->getFreshProducts();
-            productDisplay ($products);
+
+            productDisplay ($products,$userId,$votesList);
         }
         //Affichage des produit par Vote
         else if (isset($_POST['orderBy']) && $_POST['orderBy'] === 'up_vote') {
             $products = $producthunt_api->getPopularProducts();
-            productDisplay ($products);
+
+            productDisplay ($products,$userId,$votesList);
         }
         
-    }else{//Affichage d'une catégorie de produit
-         if (isset($_POST['catégorie_list']) ) {
-           
-            $categorie = $producthunt_api->getCategory($_POST['catégorie_list']);
-            $products = $producthunt_api->getProductsCollection($categorie['category_id']);
-            productDisplay ($products);
-       
+        }else{//Affichage d'une catégorie de produit
+             if (isset($_POST['catégorie_list']) ) {
+            
+                $categorie = $producthunt_api->getCategory($_POST['catégorie_list']);
+                $products = $producthunt_api->getProductsCollection(intval($categorie['category_id']));
+                productDisplay ($products,$userId,$votesList);
+            
+            }
         }
-    }
 
 
-// function getUserId($UserId){
-    // for ($i=0; $i < count($UserId) ; $i++) {
-// $UserId = $producthunt_api->getUserbyName($_COOKIE["user_name"]);
-// var_dump($UserId);
-//}
-//}
+
+
 
 ?>
 

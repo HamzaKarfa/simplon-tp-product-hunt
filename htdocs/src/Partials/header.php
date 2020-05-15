@@ -57,7 +57,7 @@
 						<?php } ?>
 					</div>
 					<div class="col-3 d-flex justify-content-center  p-0">
-						<form  method="post" id="catégorie_list" action="index.php"> 
+						<form  method="post" action="index.php"> 
 
 							<select name="catégorie_list" id="catégorie_list">
 								<?php 

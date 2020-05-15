@@ -6,6 +6,7 @@ declare(strict_types=1);
 namespace Models;
 
 use Exception;
+use PDO, PDOException;
 use Helpers\DBConfig;
 use Controllers\Controller;
 
@@ -247,11 +248,12 @@ class ProductHuntAPI extends DBPDO
      */
     public function getCategory(int $category_id): array
     {
-        if ($category_id < 0) {
-            $category_id = 0;
+        if ($category_id <= 0) {
+            // $category_id = 0;
+            return [];
         }
 
-        return $this->execute(
+        $category = $this->execute(
             'product_hunt',
             'SELECT
                  `category_id`,
@@ -264,9 +266,15 @@ class ProductHuntAPI extends DBPDO
             `category_id` = ?;',
             [$category_id]
         );
+
+        if (!empty($category)) {
+            $category = $category[0];
+        }
+
+        return $category;
     }
     /**
-     * Get product content associated to a given product id.
+     * Get product content associated with a given product id.
      * 
      * @api
      * @todo Implement query
@@ -279,16 +287,48 @@ class ProductHuntAPI extends DBPDO
      *     'product_id'     => int,
      *     'content'        => string,
      *     'media'          => array[string, ...]
+     *     'comments'       => [
+     *                             [
+     *                                 'comment_id'     => int,
+     *                                 'product_id'     => int,
+     *                                 'user_id'        => int,
+     *                                 'name'           => string,
+     *                                 'created_at'     => string date('Y-m-d H:i:s'),
+     *                                 'content'        => string
+     *                             ], 
+     *                             ...
+     *                         ]
      * ] </code></pre>
      */
     public function getProduct(int $product_id): array
     {
-        return [
-            'article_id' => 1,
-            'product_id' => $product_id,
-            'content'    => 'Rewind displays your bookmarks filtered by date, with thumbnails and instant search. It takes one click to see the links you saved yesterday, last week, last month. It\'s totally free and it relies on your local bookmarks, you don\'t have to create an account.',
-            'media'      => json_decode('["public/images/products/1_Rewind_0.webp","public/images/products/1_Rewind_1.webp","public/images/products/1_Rewind_2.webp","public/images/products/1_Rewind_3.webp","public/images/products/1_Rewind_4.webp"]')
-        ];
+        if ($product_id <= 0) {
+            return [];
+        }
+
+        $product = $this->execute(
+            'product_hunt',
+            'SELECT
+                 `product_id`,
+                 `article_id`,
+                 `content`,
+                 `media`
+             FROM 
+                 `articles`
+             WHERE
+                `product_id` = ?;',
+            [$product_id]
+        );
+
+        if (!empty($product)) {
+            $product = $product[0];
+        }
+
+        if (isset($product['media'])) {
+            $product['media'] = json_decode($product['media']);
+        }
+
+        return $product;
     }
 
     /**
@@ -528,14 +568,35 @@ class ProductHuntAPI extends DBPDO
      *     'ip'          => string
      * ] </code></pre>
      */
-    public function getUserById(string $user_id): array
+    public function getUserById(int $user_id): array
     {
-        return [
-            'user_id'     => $user_id,
-            'name'        => 'JeanPlaceHaut-le-Der',
-            'created_at'  => '2020-05-10 07:01:00',
-            'ip'          => '127.0.0.1'
-        ];
+        if ($user_id <= 0) {
+            return [];
+        }
+
+        $user = $this->execute(
+            'product_hunt',
+            'SELECT
+                 `user_id`,
+                 `name`,
+                 `created_at`,
+                 `ip`
+             FROM
+                 `users`
+             WHERE
+                 `user_id` = ?;',
+            [$user_id]
+        );
+
+        if (!empty($user)) {
+            $user = $user[0];
+        }
+
+        if (isset($user['ip'])) {
+            $user['ip'] = inet_ntop($user['ip']);
+        }
+
+        return $user;
     }
 
     /**
@@ -558,12 +619,33 @@ class ProductHuntAPI extends DBPDO
      */
     public function getUserbyName(string $name): array
     {
-        return [
-            'user_id'     => 1,
-            'name'        => $name,
-            'created_at'  => '2020-05-10 07:01:00',
-            'ip'          => '127.0.0.1'
-        ];
+        if ($name === '') {
+            return [];
+        }
+
+        $user = $this->execute(
+            'product_hunt',
+            'SELECT
+                 `user_id`,
+                 `name`,
+                 `created_at`,
+                 `ip`
+             FROM
+                 `users`
+             WHERE
+                 `name` = ?;',
+            [$name]
+        );
+
+        if (!empty($user)) {
+            $user = $user[0];
+        }
+
+        if (isset($user['ip'])) {
+            $user['ip'] = inet_ntop($user['ip']);
+        }
+
+        return $user;
     }
 
     /**
@@ -587,12 +669,42 @@ class ProductHuntAPI extends DBPDO
      */
     public function addUser(string $name, string $ip): array
     {
-        return [
-            'user_id'     => 1,
-            'name'        => $name,
-            'created_at'  => date('Y-m-d H:i:s'),
-            'ip'          => $ip
-        ];
+        if ($name === '' || !filter_var(
+            $ip,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_IPV4 | FILTER_FLAG_IPV6
+        )) {
+            return [];
+        }
+
+        try {
+            $user = $this->execute(
+                'product_hunt',
+                'INSERT INTO `users`(
+                `name`, 
+                `created_at`, 
+                `ip`)
+            VALUES(
+                ?,
+                ?,
+                ?);',
+                [$name, date('Y-m-d H:i:s'), inet_pton($ip)]
+            );
+        } catch (PDOException $e) {
+            $error_msg = $e->getMessage();
+
+            $duplicate_entry = 'Integrity constraint violation: 1062 Duplicate entry';
+            if (strpos($error_msg, $duplicate_entry) !== false) {
+                /* Name already exists */
+                return [];
+            } else {
+                throw $e;
+            }
+        }
+
+        $user = $this->getUserById(intval($this->db->pdo->lastInsertId()));
+
+        return $user;
     }
 
     /**
@@ -606,9 +718,41 @@ class ProductHuntAPI extends DBPDO
      * 
      * @return int Given product updated votes count.
      */
+
     public function vote(int $user_id, int $product_id): int
     {
-        return 1;
+        if (($user_id <= 0) || ($product_id <= 0)) {
+            return [];
+        }
+
+        $insert_result = $this->execute(
+            'product_hunt',
+            'INSERT INTO `votes`(
+                `product_id`,
+                `user_id`,
+                `created_at`
+            )
+            VALUES(?, ?, ?);',
+            [$product_id, $user_id, date('Y-m-d H:i:s')]
+        );
+
+
+        $result = $this->execute(
+            'product_hunt',
+            'SELECT
+                 COUNT(`product_id`) AS votes_count
+             FROM
+                 `votes`
+             WHERE
+                 `product_id` = ?;',
+            [$product_id]
+        );
+
+        // if (!empty($result)) {
+        //     $result = $result[0];
+        // }
+
+        return $result[0]['votes_count'];
     }
 
     /**
@@ -645,3 +789,7 @@ class ProductHuntAPI extends DBPDO
         ];
     }
 }
+
+// * @return int|null Given product updated votes count or null if failed to
+// *                  insert. Insertion failure is most likely to occur when
+// *                  trying insert a vote that has already been registered.

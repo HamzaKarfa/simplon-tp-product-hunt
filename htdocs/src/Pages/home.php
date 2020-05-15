@@ -1,11 +1,36 @@
 <?php
-
 if (isset($_POST['user_name'])) {
     setcookie('user_name', $_POST['user_name'], time() + 3600); //Cookie 1h
     $url = "index.php";
     $delay = 1;
     header("Refresh: $delay;url=$url");
 }
+//Création nouvel utilisateur s'il n'existe pas dans la BDD
+if (isset($_COOKIE['user_name'])) {
+    $user = $producthunt_api->getUserbyName($_COOKIE['user_name']);
+    
+    if ( empty($user)) {
+    $user = $producthunt_api->addUser($_COOKIE['user_name'], getIp() );
+       echo 'add user succes';
+    }else{
+    
+    }
+    
+    
+
+
+    }    
+    function getIp() {
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+        echo($ip);
+        return $ip;
+    }
 
 include ROOT . 'src/Partials/header.php' 
 ?>
