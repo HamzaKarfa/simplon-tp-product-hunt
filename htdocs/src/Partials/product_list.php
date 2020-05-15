@@ -6,7 +6,14 @@ function productDisplay ($products){
 
 ?>
 
-        <div data-product-id='<?= $products[$i]["id"] ?>' id="div-product" class=" div-product border row m-0 p-4 "  data-toggle="modal" data-target=".bd-example-modal-xl">
+        <div id="div-product" class=" div-product border row m-0 p-4 "  data-toggle="modal" data-target=".bd-example-modal-xl"
+             data-product-id='<?= $products[$i]["product_id"] ?>'
+             data-product-user-id='<?= $products[$i]["user_id"] ?>'
+             data-product-name='<?= $products[$i]["name"] ?>'
+             data-product-summary='<?= $products[$i]["summary"] ?>' 
+             data-product-website='<?= $products[$i]["website"] ?>'
+             data-product-img='<?= $products[$i]["thumbnail"] ?>'
+        >
                 
                 <div class="col-2 d-flex align-items-center justify-content-center m-0 p-0 ">
                      <div class = "product-img">
@@ -17,11 +24,8 @@ function productDisplay ($products){
              
                 <div class="col-8 text-left "> 
 
-
-                    <h4 class="title"><?=$products[$i]['name']?></h4><br>
-            
-            
-                    <p class="summary "><?=$products[$i]['summary']?></p>         
+                    <h4 class="title" ><?=$products[$i]['name']?></h4><br>
+                    <p class="summary" ><?=$products[$i]['summary']?></p>         
                     <hr>
                     <div  class="d-flex justify-content-around link_product">
                         <div class=" website" >
@@ -41,7 +45,7 @@ function productDisplay ($products){
                     <div class="up-vote border">
                     <button type="button" class="btn btn-outline-light" id="btn_upVote">
                         <img src="public/images/icons/upvote.png"></img>
-                        <h4 class="text-dark"><?=$products[$i]['votes_count']?></h4>
+                        <h4 class="voteCount text-dark"><?=$products[$i]['votes_count']?></h4>
                     </button>
                     </div>
 
@@ -59,12 +63,14 @@ function productDisplay ($products){
     
     
     if ((isset($_POST['catégorie_list']) ) == null){
+        //Affichage des produit par defaut
         if (isset($_POST['orderBy']) == null || $_POST['orderBy'] === 'default'){
-            echo 'default';
+ 
+            
             $products = $producthunt_api->getProductsCollection(10);
             productDisplay ($products);
         }
-
+        //Affichage des produit par catégorie
         else if (isset($_POST['orderBy']) && $_POST['orderBy'] === 'catégorie'){ 
            $categorie = $producthunt_api->getCategories();
             for ($i=0; $i < count($categorie) ; $i++) { 
@@ -76,26 +82,36 @@ function productDisplay ($products){
                     productDisplay ($products);
             }
         }
+        //Affichage des produit par date de création
         else if (isset($_POST['orderBy']) && $_POST['orderBy'] === 'created_at'){ 
-            $products = $producthunt_api->getFreshProducts(10);
+            $products = $producthunt_api->getFreshProducts();
             productDisplay ($products);
         }
+        //Affichage des produit par Vote
         else if (isset($_POST['orderBy']) && $_POST['orderBy'] === 'up_vote') {
-            $products = $producthunt_api->getPopularProducts(10);
+            $products = $producthunt_api->getPopularProducts();
             productDisplay ($products);
         }
-    }else{
+        
+    }else{//Affichage d'une catégorie de produit
          if (isset($_POST['catégorie_list']) ) {
            
             $categorie = $producthunt_api->getCategory($_POST['catégorie_list']);
             $products = $producthunt_api->getProductsCollection($categorie['category_id']);
             productDisplay ($products);
-                
+       
         }
     }
 
-?>
 
+// function getUserId($UserId){
+    // for ($i=0; $i < count($UserId) ; $i++) {
+// $UserId = $producthunt_api->getUserbyName($_COOKIE["user_name"]);
+// var_dump($UserId);
+//}
+//}
+
+?>
 
 <!--productModal-->
 <div class="modal fade bd-example-modal-xl" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">

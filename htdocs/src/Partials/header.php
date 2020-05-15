@@ -32,7 +32,7 @@
 						
 					</div>
 
-					<div class="col-4 d-flex justify-content-center  p-0 mr-4">
+					<div class="col-4 d-flex justify-content-center  p-0 mr-4 mt-3">
 						<?php if (isset($_COOKIE['user_name'])){?>
 							<h6>Trier par : </h6>
 							<div class="pl-3 ">
@@ -51,7 +51,7 @@
 									<form  method="post" id="up_vote" action="index.php"> 
 										<input type="hidden" name="orderBy" value="up_vote"/> 
 									</form> 
-									<a href='#' onclick='document.getElementById("up_vote").submit()'> Populaire</a>
+									<a href='#' onclick='document.getElementById("up_vote").submit()'> Popularité</a>
 								</div>
 							</div>
 						<?php } ?>
