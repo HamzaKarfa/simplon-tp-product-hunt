@@ -1,19 +1,18 @@
 <?php
 if (isset($_POST['user_name'])) {
     setcookie('user_name', $_POST['user_name'], time() + 3600); //Cookie 1h
-    $url = "index.php";
-    $delay = 1;
-    header("Refresh: $delay;url=$url");
+    // $url = "index.php";
+    // $delay = 1;
+    header("Refresh: 0;url=index.php");
 }
+
 //Création nouvel utilisateur s'il n'existe pas dans la BDD
 if (isset($_COOKIE['user_name'])) {
     $user = $producthunt_api->getUserbyName($_COOKIE['user_name']);
     
     if ( empty($user)) {
     $user = $producthunt_api->addUser($_COOKIE['user_name'], getIp() );
-       echo 'add user succes';
-    }else{
-    
+    //    echo 'add user success';
     }
     
     
@@ -28,22 +27,21 @@ if (isset($_COOKIE['user_name'])) {
         } else {
             $ip = $_SERVER['REMOTE_ADDR'];
         }
-        echo($ip);
+        // echo($ip);
         return $ip;
     }
 
 include ROOT . 'src/Partials/header.php' 
 ?>
 
-<main class='container-fluid d-flex justify-content-center flex-column pt-5 border '>
+<main class='container-fluid d-flex justify-content-center flex-column pt-5 border-0 '>
 
-    <h1 class="mb-5 text-center"> Product Hunts </h1>
+    <!-- <h1 class="mb-5 text-center"> Product Hunts </h1> -->
 
-    <div class="row ">
+    <div class="row">
 
-        <div class=" col-xl-3 col-lg-1 ">
-        </div>
-        <div class="col-xl-6 col-lg-10 text-center m-0 p-0 ">
+
+        <div class="col-12 col-md-11 col-lg-10 col-xl-8 text-center m-0 p-0 mx-auto">
 
             <?php
             if (isset($_COOKIE['user_name'])) {
@@ -54,9 +52,6 @@ include ROOT . 'src/Partials/header.php'
             }
             ?>
 
-        </div>
-
-        <div class=" col-xl-3 col-lg-1 ">
         </div>
 
     </div>

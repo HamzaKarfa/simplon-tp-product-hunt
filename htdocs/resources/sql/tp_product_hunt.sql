@@ -29,6 +29,11 @@ CREATE TABLE `products` (
 --
 -- Table structure for table `articles`
 --
+-- note
+--   This is the MariaDB version.
+--   MySql 5.7 and above should support JSON type
+--   If all else fails use LONGTEXT
+--
 CREATE TABLE `articles` (
     `article_id` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `product_id` MEDIUMINT UNSIGNED NOT NULL,
@@ -70,13 +75,15 @@ CREATE TABLE `collections` (
 --
 -- Table structure for table `users`
 --
+-- ALTER TABLE `users` CHANGE `ip` `ip` VARBINARY(16) NOT NULL; 
+
 CREATE TABLE `users` (
     `user_id` MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `name` CHAR(32) NOT NULL,
     `created_at` DATETIME NOT NULL,
-    `ip` INT UNSIGNED NOT NULL ,
+    `ip` VARBINARY(16) NOT NULL ,
     PRIMARY KEY (`user_id`),
-    INDEX username (`name`)
+    UNIQUE INDEX username (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;
 
 --
@@ -91,7 +98,7 @@ CREATE TABLE `votes` (
     CONSTRAINT `constraint_votes_product_fk`
         FOREIGN KEY `products_fk` (`product_id`) REFERENCES `products` (`product_id`)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `constraint_votes_category_fk`
+    CONSTRAINT `constraint_votes_user_fk`
         FOREIGN KEY `users_fk` (`user_id`) REFERENCES `users` (`user_id`)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;
@@ -114,10 +121,5 @@ CREATE TABLE `comments` (
         FOREIGN KEY `user_fk` (`user_id`) REFERENCES `users` (`user_id`)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE utf8_general_ci;
-
--- Find all votes by a given user
--- Find all comments for a given product
--- Count comments for a given product
--- Find all comments content for a given product
 
 COMMIT;

@@ -2,17 +2,18 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+            <?php readfile(ROOT . 'resources/fonts/font-ibmplexsans.min.html');?>
             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
             <link rel="stylesheet" href="./public/css/style.css">
             <title>Product Hunt</title>
             
 </head>
-<body> 
+<body class="pt-5 mt-5"> 
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
 		
 			<a class="navbar-brand" href="index.php">
-			<img src="./public/images/icons/icon_Product_Hunt.png" >
+			<img src="./public/images/icons/product-hunt.png" >
 			</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
@@ -23,53 +24,55 @@
             <div class="collapse navbar-collapse " id="navbarSupportedContent">
 			<?php if (isset($_COOKIE['user_name'])){?>
                     
-            	  	<div class="col-5 d-flex justify-content-center p-0">
+            	  	<div class="col-5 justify-content-center p-0">
 						
-					 	 <form class="form-inline">
-            	          <input class="form-control form-control-sm " type="search" placeholder="Search" aria-label="Search">
-            	          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+					 	 <form class="form-inline input-group" id="search" method="GET" action="index.php">
+            	          <input class="form-control" type="text" name="search" placeholder="..." aria-label="Search">
+                            <div class="input-group-append">
+                                <button class="btn btn-success" type="submit">Search</button>
+                            </div>
 						</form> 
-						
+
 					</div>
 
-					<div class="col-4 d-flex justify-content-center  p-0 mr-4 mt-3">
+					<div class="col-4 d-flex justify-content-center  p-0 mr-4 mt-0">
 						<?php if (isset($_COOKIE['user_name'])){?>
-							<h6>Trier par : </h6>
+
 							<div class="pl-3 ">
 								
 								<div class="row">
-									<form  method="post" id="catégorie" action="index.php"> 
-										<input type="hidden" name="orderBy" value="catégorie"/> 
-									</form> 
-									<a href='#' onclick='document.getElementById("catégorie").submit()'>Catégorie </a>
-									<p> / </p>					
+
+									<a href='#' onclick='document.getElementById("created_at").submit()'>Fresh</a>
 									<form  method="post" id="created_at" action="index.php"> 
-										<input type="hidden" name="orderBy" value="created_at"/> 
-									</form> 
-									<a href='#' onclick='document.getElementById("created_at").submit()'> Date </a>
-									<p> / </p>						
-									<form  method="post" id="up_vote" action="index.php"> 
-										<input type="hidden" name="orderBy" value="up_vote"/> 
-									</form> 
-									<a href='#' onclick='document.getElementById("up_vote").submit()'> Popularité</a>
+                                        <input type="hidden" name="orderBy" value="created_at"/> 
+                                    </form> 
+                                    <span class="mx-2">|</span>
+                                    <a href='#' onclick='document.getElementById("up_vote").submit()'>Popular</a>
+                                    <form  method="post" id="up_vote" action="index.php"> 
+                                        <input type="hidden" name="orderBy" value="up_vote"/> 
+                                    </form> 
+                                           
 								</div>
 							</div>
 						<?php } ?>
-					</div>
-					<div class="col-3 d-flex justify-content-center  p-0">
-						<form  method="post" action="index.php"> 
+                    </div>
 
-							<select name="catégorie_list" id="catégorie_list">
-								<?php 
-								$categorie = $producthunt_api->getCategories();
-								for ($i=0; $i <count($categorie) ; $i++) { 
-									echo ("<option value=".$categorie[$i]['category_id'].">".$categorie[$i]['name']."</option>");
-								}?>
-	
-							</select>
-							<button class="btn btn-outline-success my-2 my-sm-0" type="submit">Choisir</button>
-						</form>
-					</div>
+
+<div class="dropdown">
+<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+    Categories<span class="caret"></span>
+</a>
+<ul class="dropdown-menu">
+<?php 
+
+    $categorie = $producthunt_api->getCategories();
+    for ($i=0; $i <count($categorie) ; $i++) { 
+        echo '<a class="dropdown-item" href="?category='.$categorie[$i]['category_id'].'">'.$categorie[$i]['name'].'</a>';
+    }
+?>
+</ul>
+</div>
+
 
 			<?php }?>
             </div>
@@ -77,7 +80,10 @@
             <div class="collapse navbar-collapse m-0 justify-content-end " id="navbarSupportedContent">
               	<div class="align-items-end flex-column">
 				  <?php if (isset($_COOKIE['user_name'])){?>
-                      <a class="nav-link" href="./src/Pages/logout.php" ><h4>Deconnexion</h4></a>
+                      <a class="nav-link" href="?controller=Home&action=Logout">
+                          <?= $_COOKIE['user_name']?>
+                          <h5 class="d-flex justify-content-end">Sign Out</h5>
+                      </a>
                     <?php } ?>
             	</div>  
 			</div>            

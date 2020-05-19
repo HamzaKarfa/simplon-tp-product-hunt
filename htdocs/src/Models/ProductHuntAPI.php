@@ -48,8 +48,7 @@ class ProductHuntAPI extends DBPDO
     /**
      * Get most recent products.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  int $count  How many products to return (default = 10).
      * @param  int $offset How many products to skip   (default = 0)
@@ -87,8 +86,8 @@ class ProductHuntAPI extends DBPDO
                  `products`.`summary`,
                  `products`.`website`,
                  `products`.`thumbnail`,
-                 COUNT(`comments`.`product_id`) AS `comments_count`,
-                 COUNT(`votes`.`product_id`) AS `votes_count`
+                 COUNT(DISTINCT `comments`.`comment_id`) AS `comments_count`,
+                 COUNT(DISTINCT `votes`.`user_id`) AS `votes_count`
              FROM 
                  `products`
              LEFT JOIN
@@ -106,34 +105,12 @@ class ProductHuntAPI extends DBPDO
              LIMIT ? OFFSET ?;',
             [$count, $offset]
         );
-        // return [
-        //     [
-        //         'product_id'     => 1,
-        //         'name'           => 'Rewind',
-        //         'created_at'     => '2020-05-10 07:01:00',
-        //         'website'        => 'https://rewind.netlify.app/?ref=producthunt',
-        //         'summary'        => 'Your bookmarks, by date, with thumbnails and instant search',
-        //         'thumbnail'      => 'public/images/products/thumbnails/1_Rewind.webp',
-        //         'votes_count'    => 0,
-        //         'comments_count' => 0
-        //     ], [
-        //         'product_id'     => 2,
-        //         'name'           => 'Buy For Life',
-        //         'created_at'     => '2020-05-10 07:01:00',
-        //         'website'        => 'https://rewind.netlify.app/?ref=producthunt',
-        //         'summary'        => 'Your bookmarks, by date, with thumbnails and instant search',
-        //         'thumbnail'      => 'public/images/products/thumbnails/2_Buy-For-Life.webp',
-        //         'votes_count'    => 0,
-        //         'comments_count' => 0
-        //     ]
-        // ];
     }
 
     /**
      * Get most popular products.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  int $count  How many products to return (default = 10).
      * @param  int $offset How many products to skip   (default = 0)
@@ -171,8 +148,8 @@ class ProductHuntAPI extends DBPDO
                  `products`.`summary`,
                  `products`.`website`,
                  `products`.`thumbnail`,
-                 COUNT(`comments`.`product_id`) AS `comments_count`,
-                 COUNT(`votes`.`product_id`) AS `votes_count`
+                 COUNT(DISTINCT `comments`.`comment_id`) AS `comments_count`,
+                 COUNT(DISTINCT `votes`.`user_id`) AS `votes_count`
              FROM 
                  `products`
              LEFT JOIN
@@ -195,8 +172,7 @@ class ProductHuntAPI extends DBPDO
     /**
      * Get categories sorted by id.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  int $count  How many categories to return (default = 10).
      * @param  int $offset How many categories to skip   (default = 0)
@@ -234,8 +210,7 @@ class ProductHuntAPI extends DBPDO
     /**
      * Get category info for a given category id.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  int $category_id
      * 
@@ -276,9 +251,7 @@ class ProductHuntAPI extends DBPDO
     /**
      * Get product content associated with a given product id.
      * 
-     * @api
-     * @todo Implement query
-     * @todo Return votes_count, comments_count, categories
+     * @api ProductHuntAPI
      * 
      * @param  int $product_id
      * 
@@ -299,6 +272,8 @@ class ProductHuntAPI extends DBPDO
      *                             ...
      *                         ]
      * ] </code></pre>
+     * 
+     * @todo Return categories
      */
     public function getProduct(int $product_id): array
     {
@@ -334,8 +309,7 @@ class ProductHuntAPI extends DBPDO
     /**
      * Get products associated with a given category.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  int $category_id
      * @param  int $count  How many products to return (default = 10).
@@ -355,40 +329,65 @@ class ProductHuntAPI extends DBPDO
      *     ], 
      *     ...
      * ] </code></pre>
+     * 
+     * @todo Implement query
      */
     public function getProductsCollection(
         int $category_id,
         int $count = 10,
         int $offset = 0
     ): array {
-        return [
-            [
-                'product_id'     => 5,
-                'name'           => 'Jump In Meeting',
-                'created_at'     => '2020-05-10 07:01:00',
-                'website'        => 'https://rewind.netlify.app/?ref=producthunt',
-                'summary'        => 'Your bookmarks, by date, with thumbnails and instant search',
-                'thumbnail'      => 'public/images/products/thumbnails/1_Rewind.webp',
-                'votes_count'    => 0,
-                'comments_count' => 0
-            ], [
-                'product_id'     => 6,
-                'name'           => 'ShopSavvy for Chrome',
-                'created_at'     => '2020-05-10 07:01:00',
-                'website'        => 'https://rewind.netlify.app/?ref=producthunt',
-                'summary'        => 'Your bookmarks, by date, with thumbnails and instant search',
-                'thumbnail'      => 'public/images/products/thumbnails/1_Rewind.webp',
-                'votes_count'    => 0,
-                'comments_count' => 0
-            ]
-        ];
+
+        if ($category_id <= 0) {
+            return [];
+        }
+        if ($count < 0) {
+            $count = 10;
+        }
+        if ($offset < 0) {
+            $offset = 0;
+        }
+
+        return $this->execute(
+            'product_hunt',
+            'SELECT
+                 `products`.`product_id`,
+                 `products`.`created_at`,
+                 `products`.`name`,
+                 `products`.`summary`,
+                 `products`.`website`,
+                 `products`.`thumbnail`,
+                 COUNT(DISTINCT `comments`.`comment_id`) AS `comments_count`,
+                 COUNT(DISTINCT `votes`.`user_id`) AS `votes_count`
+             FROM 
+                 `products`
+             INNER JOIN
+                 `collections`
+             ON
+                 `products`.`product_id` = `collections`.`product_id`
+             LEFT JOIN
+                 `comments`
+             ON
+                 `products`.`product_id` = `comments`.`product_id`
+             LEFT JOIN
+                 `votes`
+             ON
+                 `products`.`product_id` = `votes`.`product_id`
+             WHERE
+                 `collections`.`category_id` = ?    
+             GROUP BY
+                 `products`.`product_id`
+             ORDER BY
+                 `votes_count` DESC, `products`.`created_at` DESC
+             LIMIT ? OFFSET ?;',
+            [$category_id, $count, $offset]
+        );
     }
 
     /**
      * Find products whose name match given search string.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  string $search_string
      * @param  int $count  How many products to return (default = 10).
@@ -408,40 +407,60 @@ class ProductHuntAPI extends DBPDO
      *     ], 
      *     ...
      * ] </code></pre>
+     * 
+     * @todo Implement query
      */
     public function findProductsByName(
         string $search_string,
         int $count = 10,
         int $offset = 0
     ): array {
-        return [
-            [
-                'product_id'     => 1,
-                'name'           => 'Rewind',
-                'created_at'     => '2020-05-10 07:01:00',
-                'website'        => 'https://rewind.netlify.app/?ref=producthunt',
-                'summary'        => 'Your bookmarks, by date, with thumbnails and instant search',
-                'thumbnail'      => 'public/images/products/thumbnails/1_Rewind.webp',
-                'votes_count'    => 0,
-                'comments_count' => 0
-            ], [
-                'product_id'     => 3,
-                'name'           => 'Remoty',
-                'created_at'     => '2020-05-10 07:01:00',
-                'website'        => 'https://rewind.netlify.app/?ref=producthunt',
-                'summary'        => 'Your bookmarks, by date, with thumbnails and instant search',
-                'thumbnail'      => 'public/images/products/thumbnails/1_Rewind.webp',
-                'votes_count'    => 0,
-                'comments_count' => 0
-            ]
-        ];
+        
+        $search_string = '%'.$search_string.'%';
+
+        if ($count < 0) {
+            $count = 10;
+        }
+        if ($offset < 0) {
+            $offset = 0;
+        }
+
+        return $this->execute(
+            'product_hunt',
+            'SELECT
+                 `products`.`product_id`,
+                 `products`.`created_at`,
+                 `products`.`name`,
+                 `products`.`summary`,
+                 `products`.`website`,
+                 `products`.`thumbnail`,
+                 COUNT(DISTINCT `comments`.`comment_id`) AS `comments_count`,
+                 COUNT(DISTINCT `votes`.`user_id`) AS `votes_count`
+             FROM 
+                 `products`
+             LEFT JOIN
+                 `comments`
+             ON
+                 `products`.`product_id` = `comments`.`product_id`
+             LEFT JOIN
+                 `votes`
+             ON
+                 `products`.`product_id` = `votes`.`product_id`
+             WHERE
+                 `products`.`name` LIKE ?
+             GROUP BY
+                 `products`.`product_id`
+             ORDER BY
+                 `votes_count` DESC, `products`.`created_at` DESC
+             LIMIT ? OFFSET ?;',
+            [$search_string, $count, $offset]
+        );
     }
 
     /**
      * Find products whose content match given search string.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  string $search_string
      * @param  int $count  How many products to return (default = 10).
@@ -461,6 +480,8 @@ class ProductHuntAPI extends DBPDO
      *     ], 
      *     ...
      * ] </code></pre>
+     * 
+     * @todo Implement query
      */
     public function findProductsByContent(
         string $search_string,
@@ -493,8 +514,7 @@ class ProductHuntAPI extends DBPDO
     /**
      * Get products id a given user voted for.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  int $user_id
      * 
@@ -502,17 +522,33 @@ class ProductHuntAPI extends DBPDO
      *     int,
      *     ...
      * ] </code></pre>
+     * 
+     * @todo Implement query
      */
     public function getUserVotes(int $user_id): array
     {
-        return [1, 2, 3, 9];
+        if ($user_id <= 0) {
+            return [];
+        }
+
+        $products = $this->execute(
+            'product_hunt',
+            'SELECT
+                 `product_id`
+             FROM
+                 `votes`
+             WHERE
+                 `user_id` = ?;',
+            [$user_id]
+        );
+
+        return array_column($products, 'product_id');
     }
 
     /**
      * Get comments for a given product.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  int $product_id
      * 
@@ -527,6 +563,8 @@ class ProductHuntAPI extends DBPDO
      *     ], 
      *     ...
      * ] </code></pre>
+     * 
+     * @todo Implement query
      */
     public function getProductComments(int $product_id): array
     {
@@ -556,8 +594,7 @@ class ProductHuntAPI extends DBPDO
      * note
      *      Returns an empty array if given user id does NOT exist.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  int $user_id
      * 
@@ -590,11 +627,12 @@ class ProductHuntAPI extends DBPDO
 
         if (!empty($user)) {
             $user = $user[0];
+
+            if (isset($user['ip'])) {
+                $user['ip'] = inet_ntop($user['ip']);
+            }
         }
 
-        if (isset($user['ip'])) {
-            $user['ip'] = inet_ntop($user['ip']);
-        }
 
         return $user;
     }
@@ -605,8 +643,7 @@ class ProductHuntAPI extends DBPDO
      * note
      *      Returns an empty array if given user name does NOT exist.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  string $name
      * 
@@ -654,8 +691,7 @@ class ProductHuntAPI extends DBPDO
      * note
      *      Returns an empty array if operation could NOT complete.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  string $name
      * @param  string $ip
@@ -710,8 +746,7 @@ class ProductHuntAPI extends DBPDO
     /**
      * Register a vote for given user on given product.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  int $user_id
      * @param  int $product_id
@@ -748,18 +783,13 @@ class ProductHuntAPI extends DBPDO
             [$product_id]
         );
 
-        // if (!empty($result)) {
-        //     $result = $result[0];
-        // }
-
         return $result[0]['votes_count'];
     }
 
     /**
      * Register a comment for given user on given product.
      * 
-     * @api
-     * @todo Implement query
+     * @api ProductHuntAPI
      * 
      * @param  int $user_id
      * @param  int $product_id
@@ -773,6 +803,8 @@ class ProductHuntAPI extends DBPDO
      *     'created_at'     => string date('Y-m-d H:i:s'),
      *     'content'        => string
      * ] </code></pre>
+     * 
+     * @todo Implement query
      */
     public function comment(
         int $user_id,
@@ -789,7 +821,3 @@ class ProductHuntAPI extends DBPDO
         ];
     }
 }
-
-// * @return int|null Given product updated votes count or null if failed to
-// *                  insert. Insertion failure is most likely to occur when
-// *                  trying insert a vote that has already been registered.

@@ -12,8 +12,8 @@
 declare(strict_types=1);
 
 define('ROOT', __DIR__ . '/');
-define('DEV_FORCE_CONFIG_UPDATE', true);
-define('DEV_GLOBALS_DUMP', true);
+define('DEV_FORCE_CONFIG_UPDATE', false);
+define('DEV_GLOBALS_DUMP', false);
 
 require ROOT . 'src/Helpers/AutoLoader.php';
 
@@ -35,12 +35,10 @@ date_default_timezone_set('Europe/Paris');
 //---------------------------------------------------------------------- run
 $t = microtime(true);
 
-
 $dispatcher = new Dispatcher($config);
 // $dispatcher->route()->cache();
 $dispatcher->route();
 
-// require ROOT . 'src/Pages/home.php';
 
 $time_spent['serving_page'] = (microtime(true) - $t);
 //------------------------------------------------------------------- config

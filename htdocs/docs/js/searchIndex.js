@@ -136,6 +136,11 @@ Search.appendIndex(
             "summary": "note\n\u0020\u0020Prepend\u0020all\u0020actions\u0020meant\u0020to\u0020be\u0020callable\u0020by\u0020a\u0020request\u0020with\u0020\u0027run\u0027",
             "url": "../classes/Controllers-Home.html#method_runDefault"
         },                {
+            "fqsen": "\\Controllers\\Home\u003A\u003ArunLogout\u0028\u0029",
+            "name": "runLogout",
+            "summary": "",
+            "url": "../classes/Controllers-Home.html#method_runLogout"
+        },                {
             "fqsen": "\\Controllers\\ProductHuntAPI",
             "name": "ProductHuntAPI",
             "summary": "RESTish\u0020API",
@@ -513,7 +518,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Models\\ProductHuntAPI\u003A\u003AgetProduct\u0028\u0029",
             "name": "getProduct",
-            "summary": "Get\u0020product\u0020content\u0020associated\u0020to\u0020a\u0020given\u0020product\u0020id.",
+            "summary": "Get\u0020product\u0020content\u0020associated\u0020with\u0020a\u0020given\u0020product\u0020id.",
             "url": "../classes/Models-ProductHuntAPI.html#method_getProduct"
         },                {
             "fqsen": "\\Models\\ProductHuntAPI\u003A\u003AgetProductsCollection\u0028\u0029",
@@ -565,6 +570,16 @@ Search.appendIndex(
             "name": "comment",
             "summary": "Register\u0020a\u0020comment\u0020for\u0020given\u0020user\u0020on\u0020given\u0020product.",
             "url": "../classes/Models-ProductHuntAPI.html#method_comment"
+        },                {
+            "fqsen": "\\getIp\u0028\u0029",
+            "name": "getIp",
+            "summary": "",
+            "url": "../namespaces/default.html#function_getIp"
+        },                {
+            "fqsen": "\\productDisplay\u0028\u0029",
+            "name": "productDisplay",
+            "summary": "",
+            "url": "../namespaces/default.html#function_productDisplay"
         },                {
             "fqsen": "\\",
             "name": "\\",
